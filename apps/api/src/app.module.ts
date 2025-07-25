@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as path from 'path';
 import { UserModule } from './user/user.module';
 
+// index and crm
 @Module({
   imports: [
     ConfigModule.forRoot({
