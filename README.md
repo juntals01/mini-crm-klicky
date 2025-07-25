@@ -65,6 +65,20 @@ yarn install
 yarn dev
 ```
 
+### 5. Access the application
+
+Once the server is running, open your browser and navigate to:
+
+```
+http://localhost:3001
+```
+
+Make sure your `.env.local` contains:
+
+```env
+FRONTEND_URL=http://localhost:3001
+```
+
 ---
 
 ## 📂 Project Status

@@ -111,8 +111,18 @@ export default function Home() {
                 <td className="p-3 border">{u.phone}</td>
                 <td className="p-3 border">
                   <div className="flex gap-2">
-                    <button onClick={() => handleEdit(u)}>Edit</button>
-                    <button onClick={() => handleDelete(u.id)}>Delete</button>
+                    <button
+                      className="bg-yellow-500 text-white rounded px-4 py-2 hover:bg-yellow-600"
+                      onClick={() => handleEdit(u)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="bg-red-500 text-white rounded px-4 py-2 hover:bg-red-600"
+                      onClick={() => handleDelete(u.id)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </td>
               </tr>
