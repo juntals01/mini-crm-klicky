@@ -1,103 +1,125 @@
-import Image from "next/image";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { createUser, deleteUser, getUsers, updateUser, User } from '../lib/api';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [users, setUsers] = useState<User[]>([]);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  useEffect(() => {
+    getUsers().then(setUsers);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (editingId !== null) {
+      const updated = await updateUser(editingId, { name, phone });
+      setUsers((prev) => prev.map((u) => (u.id === editingId ? updated : u)));
+      setEditingId(null);
+    } else {
+      const newUser = await createUser({ name, phone });
+      setUsers((prev) => [...prev, newUser]);
+    }
+
+    setName('');
+    setPhone('');
+    setLoading(false);
+  };
+
+  const handleEdit = (user: User) => {
+    setEditingId(user.id);
+    setName(user.name);
+    setPhone(user.phone);
+  };
+
+  const handleDelete = async (id: number) => {
+    await deleteUser(id);
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+  };
+
+  return (
+    <div className="min-h-screen p-8 max-w-xl mx-auto space-y-8">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 border p-6 rounded-xl shadow bg-white dark:bg-gray-900"
+      >
+        <h1 className="text-xl font-semibold">
+          {editingId ? 'Edit User' : 'Add User'}
+        </h1>
+        <input
+          type="text"
+          placeholder="Name"
+          className="border px-3 py-2 rounded"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Phone"
+          className="border px-3 py-2 rounded"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          required
+        />
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 disabled:opacity-50"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            {loading ? 'Saving...' : editingId ? 'Update User' : 'Create User'}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              className="bg-gray-500 text-white rounded px-4 py-2 hover:bg-gray-600"
+              onClick={() => {
+                setEditingId(null);
+                setName('');
+                setPhone('');
+              }}
+            >
+              Cancel
+            </button>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </form>
+
+      <table className="w-full border-collapse border text-sm shadow bg-white dark:bg-gray-900">
+        <thead>
+          <tr className="bg-gray-100 dark:bg-gray-800 text-left">
+            <th className="p-3 border">ID</th>
+            <th className="p-3 border">Name</th>
+            <th className="p-3 border">Phone</th>
+            <th className="p-3 border">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((u, index) => {
+            console.log('User Row Key:', u.id);
+            return (
+              <tr key={u.id} className="border-t">
+                <td className="p-3 border">{u.id}</td>
+                <td className="p-3 border">{u.name}</td>
+                <td className="p-3 border">{u.phone}</td>
+                <td className="p-3 border">
+                  <div className="flex gap-2">
+                    <button onClick={() => handleEdit(u)}>Edit</button>
+                    <button onClick={() => handleDelete(u.id)}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
